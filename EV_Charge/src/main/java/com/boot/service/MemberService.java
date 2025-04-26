@@ -1,5 +1,13 @@
 package com.boot.service;
 
-public interface MemberService {
+import java.util.HashMap;
 
+import org.apache.ibatis.annotations.Param;
+
+public interface MemberService {
+	public void registUser(HashMap<String, String> param);
+
+	public int user_id_check(@Param("user_id") String id);
+
+	public int login(@Param("user_id") String id, @Param("user_password") String pw);
 }
