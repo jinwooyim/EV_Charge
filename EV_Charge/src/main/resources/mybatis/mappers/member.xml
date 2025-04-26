@@ -1,0 +1,29 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.dao.MemDAO">
+
+    <insert id="registUser">
+    	create table EV_Charge (
+			user_no int auto_increment primary key,  -- 순서를 위한 자동 증가 번호
+		    user_id varchar(50) not null unique,    -- 사용자 ID
+		    password varchar(100) not null,         -- 비밀번호
+			name varchar(20) not null,         	    -- 이름
+			email varchar(50) not null,            	-- 이메일
+			province VARCHAR(50),                   -- 도
+			city VARCHAR(50),                       -- 시
+		);
+		
+		INSERT INTO EV_Charge (user_id, password, name, email, province, city, district) 
+		VALUES
+		('test', 'test123', 'test', 'test@naver.com', 'province', 'city', 'district');
+		
+		select * from EV_Charge;
+		
+		drop table EV_Charge;
+		
+		commit;
+    </insert>
+        
+</mapper>
