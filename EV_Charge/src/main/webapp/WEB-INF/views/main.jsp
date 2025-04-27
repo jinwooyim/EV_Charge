@@ -10,7 +10,9 @@
 		
     </script>
 </head>
+
 <body>
+<br>
     main.jsp<br>
     <a href="login"><button>로그인</button></a>
     <a href="registe"><button>회원가입</button></a>
