@@ -21,8 +21,8 @@
     	select count(*) from EV_user where user_id=#{user_id} and user_password=#{user_password}
     </select>
     
-    <select id="select_area">
-    	select area_ctpy_cd, area_sgg_cd, area_emd_cd from EV_user where user_id=#{user_id};
+    <select id="member_find" resultType="com.boot.dto.MemberDTO" >
+    	select * from EV_user where user_id=#{user_id};
     </select>
     
 </mapper>

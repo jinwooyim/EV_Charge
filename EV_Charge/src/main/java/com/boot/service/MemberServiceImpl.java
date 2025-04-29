@@ -39,9 +39,9 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public MemberDTO select_area(String id) {
+	public MemberDTO member_find(String id) {
 		MemberDAO dao = sqlSession.getMapper(MemberDAO.class);
-		MemberDTO dto = dao.select_area(id);
+		MemberDTO dto = dao.member_find(id);
 		return dto;
 	}
 }
