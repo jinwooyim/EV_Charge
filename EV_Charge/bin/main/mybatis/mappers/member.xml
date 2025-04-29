@@ -6,9 +6,9 @@
 
 	<!-- 회원 가입 -->
     <insert id="registUser">
-		insert into EV_user (user_id, user_password, user_name, user_email, user_province, user_city) 
+		insert into EV_user (user_no, user_id, user_password, user_name, user_email, area_ctpy_nm, area_sgg_nm, area_emd_nm) 
 		values
-		(#{user_id}, #{user_password}, #{user_name}, #{user_email}, #{user_province}, #{user_city})
+		(user_no, #{user_id}, #{user_password}, #{user_name}, #{user_email}, #{area_ctpy_nm}, #{area_sgg_nm}, #{area_emd_nm})
     </insert>
     
     <!-- 아이디 중복 체크 -->

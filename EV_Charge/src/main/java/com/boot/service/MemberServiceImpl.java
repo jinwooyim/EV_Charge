@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.boot.dao.MemberDAO;
+import com.boot.dto.MemberDTO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,5 +36,12 @@ public class MemberServiceImpl implements MemberService {
 		int count = dao.user_id_check(id);
 
 		return count;
+	}
+
+	@Override
+	public MemberDTO select_area(String id) {
+		MemberDAO dao = sqlSession.getMapper(MemberDAO.class);
+		MemberDTO dto = dao.select_area(id);
+		return dto;
 	}
 }

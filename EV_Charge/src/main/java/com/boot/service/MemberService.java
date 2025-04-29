@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.boot.dto.MemberDTO;
+
 public interface MemberService {
 	public void registUser(HashMap<String, String> param);
 
@@ -11,4 +13,5 @@ public interface MemberService {
 
 	public int login(@Param("user_id") String id, @Param("user_password") String pw);
 
+	public MemberDTO select_area(@Param("user_id") String id);
 }
