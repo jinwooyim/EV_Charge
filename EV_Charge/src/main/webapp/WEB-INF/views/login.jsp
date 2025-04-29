@@ -14,7 +14,7 @@
 					사용자ID
 				</td>
 				<td width="100">
-					<input type="text" name="mem_uid">
+					<input type="text" name="user_id">
 				</td>
 			</tr>
 			<tr height="30">
@@ -22,7 +22,7 @@
 					비밀번호
 				</td>
 				<td width="100">
-					<input type="text" name="mem_pwd">
+					<input type="text" name="user_password">
 				</td>
 			</tr>
 			<tr height="30">

@@ -1,6 +1,5 @@
 package com.boot.controller;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.boot.dto.AreaDTO;
-import com.boot.dto.MemberDTO;
 import com.boot.service.MemberService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +30,6 @@ public class MemberController {
 	@RequestMapping("/registe")
 	public String registe(Model model) {
 		log.info("registe");
-
-		ArrayList<MemberDTO> area_province_list = memberService.select_area();
-		model.addAttribute("area_province_list", area_province_list);
-
 		return "registe";
 	}
 
@@ -47,10 +40,20 @@ public class MemberController {
 		return "login";
 	}
 
+	@RequestMapping("/login_yn")
+	public String login_yn(@RequestParam("user_id") String user_id,
+			@RequestParam("user_password") String user_password) {
+		int result = memberService.login(user_id, user_password);
+		log.info("@# result =>" + result);
+		if (result != 0) {
+			return "redirect:/main";
+		}
+		return "redirect:/login";
+	}
+
 	// 회원가입
 	@RequestMapping("/registe_user")
 	public String registe_user(@RequestParam HashMap<String, String> param) {
-		log.info("@# registe_user()");
 
 		memberService.registUser(param);
 
@@ -67,18 +70,6 @@ public class MemberController {
 		} else {
 			return "fail";
 		}
-	}
-
-	// '시'
-	@RequestMapping("/province_of_city")
-	@ResponseBody
-	public ArrayList<AreaDTO> province_of_city(@RequestParam("user_province") String param) {
-		log.info("province_of_city");
-		log.info("@# param =>" + param);
-		ArrayList<AreaDTO> cites = areaService.select_area_city(param);
-		log.info("" + cites);
-
-		return cites;
 	}
 
 }

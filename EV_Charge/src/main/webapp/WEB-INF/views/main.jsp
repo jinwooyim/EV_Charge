@@ -23,7 +23,6 @@
 		<div id="sidebar">
 			<h1>지역 선택</h1>
 
-
 			<form id="address-form">
 				<label for="area_ctpy_nm">시/도</label>
 				<select id="area_ctpy_nm" name="area_ctpy_nm" onchange="updatearea_sgg_nm()">

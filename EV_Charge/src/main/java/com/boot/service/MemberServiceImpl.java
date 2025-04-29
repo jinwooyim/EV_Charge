@@ -26,8 +26,8 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public int login(String id, String pw) {
 		MemberDAO dao = sqlSession.getMapper(MemberDAO.class);
-		dao.login(id, pw);
-		return 0;
+		int result = dao.login(id, pw);
+		return result;
 	}
 
 	@Override

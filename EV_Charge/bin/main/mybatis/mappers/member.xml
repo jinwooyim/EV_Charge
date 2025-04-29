@@ -6,9 +6,9 @@
 
 	<!-- 회원 가입 -->
     <insert id="registUser">
-		insert into EV_user (user_no, user_id, user_password, user_name, user_email, area_ctpy_nm, area_sgg_nm, area_emd_nm) 
+		insert into EV_user (user_id, user_password, user_name, user_email, area_ctpy_nm, area_sgg_nm, area_emd_nm) 
 		values
-		(user_no, #{user_id}, #{user_password}, #{user_name}, #{user_email}, #{area_ctpy_nm}, #{area_sgg_nm}, #{area_emd_nm})
+		(#{user_id}, #{user_password}, #{user_name}, #{user_email}, #{area_ctpy_nm}, #{area_sgg_nm}, #{area_emd_nm})
     </insert>
     
     <!-- 아이디 중복 체크 -->
@@ -17,8 +17,12 @@
     </select>
 
     <!-- 로그인 -->
-    <select id="login">
+    <select id="login" resultType="int">
     	select count(*) from EV_user where user_id=#{user_id} and user_password=#{user_password}
+    </select>
+    
+    <select id="select_area">
+    	select area_ctpy_cd, area_sgg_cd, area_emd_cd from EV_user where user_id=#{user_id};
     </select>
     
 </mapper>
