@@ -62,6 +62,7 @@ public class MemberController {
 			HttpSession session = request.getSession();
 			MemberDTO dto = memberService.member_find(user_id);
 			session.setAttribute("user", dto);
+
 			log.info("@# user => " + session.getAttribute("user"));
 			return "redirect:/main";
 		}
@@ -86,6 +87,38 @@ public class MemberController {
 		memberService.registUser(param);
 
 		return "main";
+	}
+
+	// 마이페이지
+	@RequestMapping("/mypage")
+	public String mypage(Model model, HttpServletRequest request) {
+		HttpSession session = request.getSession();
+		MemberDTO dto = (MemberDTO) session.getAttribute("user");
+		model.addAttribute("memberDTO", dto);
+
+		return "mypage";
+	}
+
+	// 회원정보 수정창 이동
+	@RequestMapping("/editInfo")
+	public String editInfo(Model model, HttpServletRequest request) {
+		HttpSession session = request.getSession();
+		MemberDTO dto = (MemberDTO) session.getAttribute("user");
+		model.addAttribute("memberDTO", dto);
+
+		return "editInfo";
+	}
+
+	// 회원정보 수정실행
+	@RequestMapping("/updateMember")
+	public String updateMember(@RequestParam HashMap<String, String> param, HttpServletRequest request) {
+		HttpSession session = request.getSession();
+		memberService.update_ok(param);
+		if (session != null) {
+			session.invalidate(); // 세션 완전 삭제
+		}
+
+		return "redirect:/main";
 	}
 
 	// 아이디 중복체크

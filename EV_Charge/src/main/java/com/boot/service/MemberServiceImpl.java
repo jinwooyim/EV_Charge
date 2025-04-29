@@ -44,4 +44,11 @@ public class MemberServiceImpl implements MemberService {
 		MemberDTO dto = dao.member_find(id);
 		return dto;
 	}
+
+	@Override
+	public void update_ok(HashMap<String, String> param) {
+		MemberDAO dao = sqlSession.getMapper(MemberDAO.class);
+		dao.update_ok(param);
+		log.info("수정완료");
+	}
 }

@@ -34,7 +34,7 @@
         <c:choose>
             <c:when test="${not empty sessionScope.user}">
                 <span>${sessionScope.user.user_name}님 환영합니다.</span>
-                <a href="${pageContext.request.contextPath}/mypage" class="btn btn-outline-secondary me-2">마이페이지</a>
+                <a href="mypage" class="btn btn-outline-secondary me-2">마이페이지</a>
                 <a href="logout" class="btn btn-danger">로그아웃</a>
             </c:when>
             <c:otherwise>

@@ -41,11 +41,13 @@ public class FindLocationController {
 	@Value("${kakao.api.key}") // API Key를 application.properties에서 주입
 	private String kakaoApiKey;
 
+	// 주소를 경도 위도로 변환
 	@PostMapping("/updateMapCoordinates")
 	public String updateMapCoordinates(@RequestBody MemberDTO address) {
 		String[] coordinates = new String[2]; // [0] -> latitude, [1] -> longitude
 
 		try {
+//			String addressString = "서울특별시 강남구 선릉로 121길 12";
 			String addressString = buildAddress(address, true);
 			JSONArray documents = getJSONResponse(addressString);
 

@@ -15,4 +15,6 @@ public interface MemberDAO {
 
 	public MemberDTO member_find(@Param("user_id") String id);
 
+	public void update_ok(HashMap<String, String> param);
+
 }

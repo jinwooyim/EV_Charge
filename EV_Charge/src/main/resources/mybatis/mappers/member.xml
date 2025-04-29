@@ -21,6 +21,15 @@
     	select count(*) from EV_user where user_id=#{user_id} and user_password=#{user_password}
     </select>
     
+<!--    회원정보 수정-->
+    <update id="update_ok">
+		update EV_user set user_password=#{user_password}, user_name=#{user_name},
+		user_email=#{user_email}, area_ctpy_nm=#{area_ctpy_nm}, area_sgg_nm=#{area_sgg_nm}, area_emd_nm=#{area_emd_nm}
+		<where>
+			user_no = #{user_no}
+		</where>
+	</update>
+	
     <select id="member_find" resultType="com.boot.dto.MemberDTO" >
     	select * from EV_user where user_id=#{user_id};
     </select>
