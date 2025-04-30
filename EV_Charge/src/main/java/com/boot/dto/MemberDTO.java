@@ -1,5 +1,7 @@
 package com.boot.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,4 +18,6 @@ public class MemberDTO {
 	private String area_ctpy_nm;
 	private String area_sgg_nm;
 	private String area_emd_nm;
+	private List<String> addrList;
+
 }

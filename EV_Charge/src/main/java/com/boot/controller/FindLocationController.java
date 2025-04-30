@@ -8,12 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,10 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.boot.dto.MemberDTO;
 
@@ -41,13 +32,130 @@ public class FindLocationController {
 	@Value("${kakao.api.key}") // API Key를 application.properties에서 주입
 	private String kakaoApiKey;
 
+	@Value("${api.key}") // API Key를 application.properties에서 주입
+	private String key;
+
 	// 주소를 경도 위도로 변환
+	@PostMapping("/updateMapCoordinates_two")
+	public String updateMapCoordinates_two(@RequestBody List<List<String>> address) {
+		log.info("변환하러 오긴했음");
+		log.info(address + "");
+
+		// getJSONResponse_two 호출하여 좌표 정보 가져오기
+		JSONArray resultArray = getJSONResponse_two(address);
+		log.info(resultArray + "");
+
+		if (resultArray == null || resultArray.length() == 0) {
+			return new JSONObject().put("error", "주소에 대한 좌표를 찾을 수 없습니다.(two)").toString();
+		}
+
+		// 결과 객체 생성
+		JSONObject result = new JSONObject();
+		JSONArray coordinatesArray = new JSONArray();
+
+		// 각 주소의 결과 처리
+		for (int i = 0; i < resultArray.length(); i++) {
+			try {
+				JSONObject addressResult = resultArray.getJSONObject(i);
+
+				// 좌표 정보가 있는 경우에만 처리
+				if (addressResult.has("latitude") && addressResult.has("longitude")) {
+					JSONObject coordObj = new JSONObject();
+
+					// 주소 정보 추가
+					coordObj.put("address", addressResult.getString("address"));
+
+					// 좌표 정보 추가
+					coordObj.put("latitude", addressResult.getString("latitude"));
+					coordObj.put("longitude", addressResult.getString("longitude"));
+
+					// 장소명 정보가 있는 경우 추가
+					if (addressResult.has("name")) {
+						coordObj.put("name", addressResult.getString("name"));
+					}
+
+					coordinatesArray.put(coordObj);
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+				log.error("JSON 처리 중 오류가 발생했습니다.(two): " + e.getMessage());
+			}
+		}
+
+		result.put("coordinates", coordinatesArray);
+		return result.toString();
+	}
+
+	// kakao API를 이용해서 주소값을 위도와 경도를 가진 JSON 배열로 반환하는 메소드
+	public JSONArray getJSONResponse_two(List<List<String>> addr_list) {
+		JSONArray resultArray = new JSONArray();
+
+		for (List<String> addr_item : addr_list) {
+			if (addr_item == null || addr_item.isEmpty()) {
+				continue;
+			}
+
+			// 각 항목의 첫 번째 요소가 addr 주소임
+			String addr = addr_item.get(0);
+
+			try {
+				String encodedAddress = java.net.URLEncoder.encode(addr, "UTF-8");
+				String apiUrl = "https://dapi.kakao.com/v2/local/search/address.json?query=" + encodedAddress;
+
+				URL url = new URL(apiUrl);
+				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+				connection.setRequestMethod("GET");
+				connection.setRequestProperty("Authorization", "KakaoAK " + kakaoApiKey); // Kakao API Key
+
+				BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+				String inputLine;
+				StringBuffer response = new StringBuffer();
+
+				while ((inputLine = in.readLine()) != null) {
+					response.append(inputLine);
+				}
+				in.close();
+
+				// JSON 응답 파싱
+				JSONObject jsonResponse = new JSONObject(response.toString());
+				JSONArray documents = jsonResponse.getJSONArray("documents");
+
+				if (documents.length() > 0) {
+					JSONObject firstDocument = documents.getJSONObject(0);
+
+					// 결과 객체 생성
+					JSONObject resultItem = new JSONObject();
+					resultItem.put("address", addr);
+
+					// 위치 정보가 있는 경우에만 추가
+					if (firstDocument.has("x") && firstDocument.has("y")) {
+						resultItem.put("longitude", firstDocument.getString("x"));
+						resultItem.put("latitude", firstDocument.getString("y"));
+					}
+
+					// 장소명 정보가 있는 경우 (두 번째 요소)
+					if (addr_item.size() > 1) {
+						resultItem.put("name", addr_item.get(1));
+					}
+
+					resultArray.put(resultItem);
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		log.info(resultArray + "");
+		return resultArray; // 모든 주소 처리 후 결과 반환
+	}
+
 	@PostMapping("/updateMapCoordinates")
 	public String updateMapCoordinates(@RequestBody MemberDTO address) {
 		String[] coordinates = new String[2]; // [0] -> latitude, [1] -> longitude
 
 		try {
-//			String addressString = "서울특별시 강남구 선릉로 121길 12";
+//         String addressString = "서울특별시 강남구 선릉로 121길 12";
 			String addressString = buildAddress(address, true);
 			JSONArray documents = getJSONResponse(addressString);
 
@@ -77,11 +185,9 @@ public class FindLocationController {
 		return new JSONObject().put("latitude", coordinates[0]).put("longitude", coordinates[1]).toString();
 	}
 
-	// kakao API를 이용해서 주소값을 위도와 경도를 가진 JSON 배열로 반환하는 메소드
 	public JSONArray getJSONResponse(String addressString) {
 		try {
 			String encodedAddress = java.net.URLEncoder.encode(addressString, "UTF-8");
-
 			String apiUrl = "https://dapi.kakao.com/v2/local/search/address.json?query=" + encodedAddress;
 
 			// API 요청
@@ -125,56 +231,112 @@ public class FindLocationController {
 	// 센터점 주변 충전소 찾기
 	@RequestMapping("/findStationsNear")
 	@ResponseBody
-	public List<Map<String, Object>> findStationsNear(@RequestParam String area_ctpy_nm,
-			@RequestParam String area_sgg_nm) {
+	public List<List<String>> findStationsNear(@RequestParam String area_ctpy_nm, @RequestParam String area_sgg_nm) {
 
 		log.info("@# area_ctpy_nm =>" + area_ctpy_nm);
 		log.info("@# area_sgg_nm =>" + area_sgg_nm);
+		String metroCd;
+		switch (area_ctpy_nm) {
+		case "서울특별시":
+			metroCd = "11";
+			break;
+		case "부산광역시":
+			metroCd = "21";
+			break;
+		case "대구광역시":
+			metroCd = "22";
+			break;
+		case "인천광역시":
+			metroCd = "23";
+			break;
+		case "광주광역시":
+			metroCd = "24";
+			break;
+		case "대전광역시":
+			metroCd = "25";
+			break;
+		case "울산광역시":
+			metroCd = "26";
+			break;
+		case "경기도":
+			metroCd = "31";
+			break;
+		case "강원도":
+			metroCd = "32";
+			break;
+		case "충청북도":
+			metroCd = "33";
+			break;
+		case "충청남도":
+			metroCd = "34";
+			break;
+		case "전라북도":
+			metroCd = "35";
+			break;
+		case "전라남도":
+			metroCd = "36";
+			break;
+		case "경상북도":
+			metroCd = "37";
+			break;
+		case "경상남도":
+			metroCd = "38";
+			break;
+		case "제주도":
+			metroCd = "39";
+			break;
+		case "세종특별자치시":
+			metroCd = "41";
+			break;
+		default:
+			metroCd = "알 수 없는 코드";
+			break;
+		}
 
-		// 저장된 파일 읽어서 결과 찾기
-		List<Map<String, Object>> station_list = new ArrayList<>();
+		String cityCd = "11";
+		log.info(metroCd);
+		log.info(cityCd);
+
+		// 결과를 담을 리스트
+		List<List<String>> addr_place_list = new ArrayList<>();
 
 		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder parser = dbf.newDocumentBuilder();
+			// URL 연결
+			String p_url = "https://bigdata.kepco.co.kr/openapi/v1/EVcharge.do?apiKey=" + key
+					+ "&returnType=json&metroCd=" + metroCd + "&cityCd=" + cityCd;
+			URL url = new URL(p_url);
+			log.info(p_url + "");
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
 
-			Document xmlDoc = null; // 참조 변수
-			String url = "C:\\Users\\user\\test.xml";
-			xmlDoc = parser.parse(url);
-
-			Element root = xmlDoc.getDocumentElement();
-
-//	         Node item_node = root.getElementsByTagName("item").item(0);
-
-			int length = root.getElementsByTagName("item").getLength();
-
-			NodeList itemList = root.getElementsByTagName("item");
-
-			for (int i = 0; i < length; i++) {
-				Node itemNode = itemList.item(i);
-
-				if (itemNode.getNodeType() == Node.ELEMENT_NODE) {
-					Element itemElement = (Element) itemNode;
-					Node stat_node = itemElement.getElementsByTagName("stat").item(0);
-					Node statId_node = itemElement.getElementsByTagName("statId").item(0);
-
-					if (stat_node != null) {
-						String stat = stat_node.getTextContent();
-						String statId = statId_node.getTextContent();
-						Map<String, Object> stat_map = new HashMap<>();
-						stat_map.put(statId, stat);
-
-						station_list.add(stat_map);
-					}
-				}
+			// 결과 읽기
+			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
 			}
-			log.info(station_list + "");
+			br.close();
+
+			// JSON 파싱
+			JSONObject jsonObj = new JSONObject(sb.toString());
+			JSONArray dataArr = jsonObj.getJSONArray("data");
+
+			for (int i = 0; i < dataArr.length(); i++) {
+				List<String> addr_place = new ArrayList<>();
+				JSONObject item = dataArr.getJSONObject(i);
+				String addr = item.getString("stnAddr");
+				String place = item.getString("stnPlace");
+				addr_place.add(addr);
+				addr_place.add(place);
+				addr_place_list.add(addr_place);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		return station_list;
+		log.info(addr_place_list + "");
+		return addr_place_list;
 	}
 
 	@RequestMapping("/update")
